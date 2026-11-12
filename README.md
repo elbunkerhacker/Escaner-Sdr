@@ -33,7 +33,7 @@
 |---|
 | <img src="docs/capturas/pmr446-cascada.png" alt="Canales PMR446 con transmisiones intermitentes en la cascada"> |
 
-<sub>Capturas hechas con el simulador incluido (`npm run demo`) y datos de ejemplo.</sub>
+<sub>Capturas hechas con el simulador incluido (`npm.cmd run demo`) y datos de ejemplo.</sub>
 
 ## Cómo funciona
 
@@ -61,6 +61,10 @@ RTL-SDR ──USB── rtl_tcp.exe ──TCP:1234── server.js (FFT, barrido
 
 Todos los comandos son para **PowerShell**, dentro de la carpeta del proyecto salvo que se diga otra cosa.
 
+> Se usa `npm.cmd` en vez de `npm` porque Windows bloquea por defecto los scripts `.ps1` en PowerShell
+> (error *«la ejecución de scripts está deshabilitada en este sistema»*). `npm.cmd` funciona sin cambiar
+> ninguna configuración de seguridad. En la consola clásica (`cmd`) vale `npm` a secas.
+
 ### 1. Instala Node.js
 
 Descárgalo de https://nodejs.org/ (LTS) o instálalo con winget:
@@ -86,10 +90,10 @@ cd Escaner-Sdr
 ```
 
 ```powershell
-npm install
+npm.cmd install
 ```
 
-Sin Git: en GitHub pulsa **Code → Download ZIP**, descomprímelo y ejecuta `npm install` dentro de la carpeta.
+Sin Git: en GitHub pulsa **Code → Download ZIP**, descomprímelo y ejecuta `npm.cmd install` dentro de la carpeta.
 
 ### 3. Instala el driver WinUSB con Zadig
 
@@ -128,13 +132,13 @@ Debe decir `Found 1 device(s)` y `Found Rafael Micro R820T tuner`. El aviso fina
 Abre **dos** ventanas de PowerShell en la carpeta del proyecto. En la primera, `rtl_tcp`:
 
 ```powershell
-npm run rtl
+npm.cmd run rtl
 ```
 
 En la segunda, el servidor web:
 
 ```powershell
-npm start
+npm.cmd start
 ```
 
 Abre http://localhost:8080 y pulsa **▶ Escanear**. Para parar, `Ctrl+C` en cada ventana.
@@ -146,7 +150,7 @@ El dongle solo lo puede usar un programa a la vez: cierra SDR# u otros programas
 El simulador incluido genera emisoras FM, banda aérea, PMR446, ISM 433, ADS-B, etc.:
 
 ```powershell
-npm run demo
+npm.cmd run demo
 ```
 
 ### Opciones del servidor
@@ -159,13 +163,14 @@ bandas, frecuencias y etiquetas; por defecto `data\`).
 
 | Síntoma | Solución |
 |---|---|
-| Arriba pone **«Sin rtl_tcp (127.0.0.1:1234)»** | No está abierto `npm run rtl`, o se cerró. |
+| Arriba pone **«Sin rtl_tcp (127.0.0.1:1234)»** | No está abierto `npm.cmd run rtl`, o se cerró. |
 | `rtl_tcp` se cierra sin mensaje o da `0xC000007B` | Mezcla de 32 y 64 bits: usa el del paso 4. |
 | `usb_open error -3` / `Failed to open rtlsdr device` | Otro programa (SDR#, otro `rtl_tcp`…) ya está usando el dongle: ciérralo. Si no hay ninguno, revisa el driver (paso 3). |
 | `No supported devices found` | El dongle no está conectado o le falta el driver WinUSB (paso 3). |
 | Ruido muy alto (~-35 dBFS) y no aparece ninguna señal | Ganancia en «Auto» o al máximo: baja a unos 40 dB. |
 | No se oye nada | Pulsa 🎧 **Escuchar** (o «🔈 Activar audio»): el navegador exige un clic para reproducir sonido. Revisa el volumen. |
 | Señales «fantasma» repetidas a un salto de distancia | Sube **Asentar** a 150 ms. |
+| `npm : No se puede cargar el archivo ... npm.ps1` | Escribe `npm.cmd` en lugar de `npm` (o usa `cmd`). |
 | El puerto 8080 está ocupado | `node server.js --port 8090` y abre http://localhost:8090. |
 
 ## Cómo usarlo
