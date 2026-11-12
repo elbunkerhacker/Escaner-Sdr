@@ -1,0 +1,16 @@
+{
+  "name": "escaner-bunker-hacker",
+  "version": "1.0.0",
+  "description": "Escáner del Búnker Hacker: escáner de frecuencias web para RTL-SDR vía rtl_tcp",
+  "type": "module",
+  "main": "server.js",
+  "scripts": {
+    "start": "node server.js",
+    "sim": "node sim-rtl-tcp.js",
+    "demo": "node server.js --sim",
+    "rtl": "tools\\rtl-sdr-x64\\rtl_tcp.exe -a 127.0.0.1 -p 1234"
+  },
+  "dependencies": {
+    "ws": "^8.18.0"
+  }
+}

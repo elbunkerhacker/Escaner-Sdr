@@ -1,0 +1,251 @@
+<!doctype html>
+<html lang="es">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Escáner del Búnker Hacker</title>
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'><rect width='32' height='32' rx='6' fill='%230b1220'/><path d='M3 24 L8 22 L11 10 L14 21 L17 16 L20 22 L23 6 L26 22 L29 24' fill='none' stroke='%2322d3ee' stroke-width='2.5' stroke-linejoin='round'/></svg>">
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <header class="topbar">
+    <div class="brand">
+      <svg viewBox="0 0 32 32" aria-hidden="true"><path d="M3 24 L8 22 L11 10 L14 21 L17 16 L20 22 L23 6 L26 22 L29 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linejoin="round"/></svg>
+      <h1>Escáner del Búnker Hacker</h1>
+    </div>
+    <div class="status">
+      <span id="wsPill" class="pill off">Web ⇄ servidor</span>
+      <span id="rtlPill" class="pill off">rtl_tcp</span>
+      <span id="sweepInfo" class="muted mono"></span>
+    </div>
+  </header>
+
+  <main class="layout">
+    <aside class="panel controls">
+      <section>
+        <h2>Rango</h2>
+        <label class="field">Banda
+          <select id="preset"></select>
+        </label>
+        <div class="row2 band-actions">
+          <button id="saveBandBtn" title="Guardar el rango actual como banda propia">＋ Guardar banda</button>
+          <button id="delBandBtn" title="Borrar la banda personalizada seleccionada" disabled>🗑 Borrar</button>
+        </div>
+        <div id="bandForm" class="band-form" hidden>
+          <label class="field">Nombre<input id="bfName" maxlength="40" placeholder="p. ej. Repetidor del pueblo"></label>
+          <div class="row2">
+            <label class="field">Modo de escucha
+              <select id="bfMode">
+                <option value="">Automático</option>
+                <option value="wfm">FM ancha</option>
+                <option value="nfm">FM estrecha</option>
+                <option value="am">AM</option>
+              </select>
+            </label>
+            <label class="field">Color<input id="bfColor" type="color" value="#f97316"></label>
+          </div>
+          <p id="bfRange" class="hint mono"></p>
+          <div class="row2">
+            <button id="bfOk" class="primary">Guardar</button>
+            <button id="bfCancel">Cancelar</button>
+          </div>
+        </div>
+        <div class="row2">
+          <label class="field">Inicio (MHz)<input id="startMHz" type="number" step="0.001" min="0"></label>
+          <label class="field">Fin (MHz)<input id="stopMHz" type="number" step="0.001" min="0"></label>
+        </div>
+        <div class="row2">
+          <button id="runBtn" class="primary">▶ Escanear</button>
+          <button id="backBtn" title="Volver al rango anterior">↶ Atrás</button>
+        </div>
+        <div class="progress"><div id="progressBar"></div></div>
+        <p class="hint">Arrastra sobre el espectro para hacer zoom. Doble clic para acercar ×4.</p>
+      </section>
+
+      <section class="listen-sec">
+        <h2>Escuchar</h2>
+        <div class="row2">
+          <label class="field">Frecuencia (MHz)<input id="lsFreq" type="number" step="0.0001" min="0" value="97.3"></label>
+          <label class="field">Modo
+            <select id="lsMode">
+              <option value="wfm">FM ancha</option>
+              <option value="nfm">FM estrecha</option>
+              <option value="am">AM</option>
+            </select>
+          </label>
+        </div>
+        <div class="row2">
+          <label class="field">Ancho canal
+            <select id="lsBw">
+              <option value="5000">5 kHz</option>
+              <option value="8000">8 kHz</option>
+              <option value="10000">10 kHz</option>
+              <option value="12500" selected>12.5 kHz</option>
+              <option value="25000">25 kHz</option>
+            </select>
+          </label>
+          <label class="field">Volumen<input id="lsVol" type="range" min="0" max="2" step="0.05" value="0.8"></label>
+        </div>
+        <label class="field">Silenciador <span id="sqVal" class="mono"></span>
+          <input id="lsSquelch" type="range" min="-100" max="-10" step="1" value="-100">
+        </label>
+        <div class="meter" title="Nivel de la señal en el canal"><div id="lsLevel"></div><div id="lsSqMark"></div></div>
+        <button id="listenBtn" class="listen-btn">🎧 Escuchar</button>
+        <button id="saveFreqBtn" class="save-freq-btn" title="Guardar esta frecuencia con un nombre">★ Guardar frecuencia</button>
+        <p class="hint">Clic en el espectro para sintonizar, o 🎧 en la tabla de señales.</p>
+      </section>
+
+      <section class="freqs-sec">
+        <h2>Mis frecuencias <span id="freqCount" class="badge">0</span></h2>
+        <div id="freqForm" class="band-form" hidden>
+          <label class="field">Nombre<input id="ffName" maxlength="40" placeholder="p. ej. Torre de control"></label>
+          <div class="row2">
+            <label class="field">Frecuencia (MHz)<input id="ffFreq" type="number" step="0.00001" min="0"></label>
+            <label class="field">Modo
+              <select id="ffMode">
+                <option value="wfm">FM ancha</option>
+                <option value="nfm">FM estrecha</option>
+                <option value="am">AM</option>
+              </select>
+            </label>
+          </div>
+          <div class="row2">
+            <label class="field">Ancho canal
+              <select id="ffBw">
+                <option value="5000">5 kHz</option>
+                <option value="8000">8 kHz</option>
+                <option value="10000">10 kHz</option>
+                <option value="12500">12.5 kHz</option>
+                <option value="25000">25 kHz</option>
+              </select>
+            </label>
+            <label class="field">Nota<input id="ffNote" maxlength="80" placeholder="opcional"></label>
+          </div>
+          <div class="row2">
+            <button id="ffOk" class="primary">Guardar</button>
+            <button id="ffCancel">Cancelar</button>
+          </div>
+        </div>
+        <div id="memScanBox" class="memscan" hidden>
+          <div class="row2">
+            <label class="field">Confirmar tras (s)<input id="msHold" type="number" min="0" max="30" step="0.5" value="2"></label>
+            <label class="field">Volver tras silencio (s)<input id="msHang" type="number" min="0" max="60" step="0.5" value="2"></label>
+          </div>
+          <label class="check"><input id="msMute" type="checkbox"> Silenciar hasta confirmar</label>
+          <div class="row2">
+            <button id="msBtn" class="memscan-btn">⟳ Escanear mis frecuencias</button>
+            <button id="msSkip" title="Ignorar esta frecuencia 30 s y seguir" disabled>⏭ Saltar</button>
+          </div>
+          <div id="msStatus" class="ms-status" hidden></div>
+          <p class="hint">Salta por las marcadas ☑. Una señal cuenta si supera el «Umbral sobre el ruido» (Visualización).
+            <a href="#" id="msAll">Marcar todas</a> · <a href="#" id="msNone">ninguna</a></p>
+        </div>
+        <input id="freqFilter" class="freq-filter" type="search" placeholder="Buscar…" hidden>
+        <ul id="freqList" class="freq-list"></ul>
+        <p id="freqEmpty" class="hint">Aún no tienes frecuencias guardadas. Sintoniza una y pulsa «★ Guardar frecuencia», o ★ en la tabla de señales.</p>
+      </section>
+
+      <section>
+        <h2>Receptor</h2>
+        <label class="field">Ganancia <span id="gainVal" class="mono"></span>
+          <div class="inline">
+            <label class="check"><input id="gainAuto" type="checkbox" checked> Auto</label>
+            <input id="gain" type="range" min="0" max="28" step="1" value="14" disabled>
+          </div>
+        </label>
+        <div class="row2">
+          <label class="field">Muestreo
+            <select id="sampleRate">
+              <option value="1024000">1.024 MS/s</option>
+              <option value="1400000">1.4 MS/s</option>
+              <option value="1800000">1.8 MS/s</option>
+              <option value="2048000">2.048 MS/s</option>
+              <option value="2400000" selected>2.4 MS/s</option>
+              <option value="2560000">2.56 MS/s</option>
+              <option value="2880000">2.88 MS/s</option>
+              <option value="3200000">3.2 MS/s</option>
+            </select>
+          </label>
+          <label class="field">FFT
+            <select id="fftSize">
+              <option>256</option><option>512</option><option selected>1024</option>
+              <option>2048</option><option>4096</option><option>8192</option>
+            </select>
+          </label>
+        </div>
+        <div class="row2">
+          <label class="field">Promedios<input id="avg" type="number" min="1" max="256" value="16"></label>
+          <label class="field">Asentar (ms)<input id="settleMs" type="number" min="0" max="2000" value="80"></label>
+        </div>
+        <div class="row2">
+          <label class="field">Corrección ppm<input id="ppm" type="number" min="-200" max="200" value="0"></label>
+          <label class="field">Ancho útil
+            <select id="crop">
+              <option value="0.5">50 %</option>
+              <option value="0.625">62 %</option>
+              <option value="0.75" selected>75 %</option>
+              <option value="0.875">87 %</option>
+            </select>
+          </label>
+        </div>
+        <label class="check"><input id="biasTee" type="checkbox"> Bias-T (alimenta antena activa)</label>
+        <p id="resInfo" class="hint mono"></p>
+      </section>
+
+      <section>
+        <h2>Visualización y detección</h2>
+        <label class="field">Umbral sobre el ruido <span id="thrVal" class="mono"></span>
+          <input id="threshold" type="range" min="3" max="40" step="1" value="10">
+        </label>
+        <div class="row2">
+          <label class="field">dB mín<input id="dbMin" type="number" step="5" value="-90"></label>
+          <label class="field">dB máx<input id="dbMax" type="number" step="5" value="-10"></label>
+        </div>
+        <label class="check"><input id="autoScale" type="checkbox" checked> Escala automática</label>
+        <label class="check"><input id="peakHold" type="checkbox" checked> Retener picos</label>
+        <label class="check"><input id="showBands" type="checkbox" checked> Mostrar bandas</label>
+        <button id="resetPeak">Borrar picos</button>
+      </section>
+    </aside>
+
+    <section class="panel display">
+      <div class="canvas-wrap" id="specWrap">
+        <canvas id="spectrum"></canvas>
+        <div id="readout" class="readout mono" hidden></div>
+      </div>
+      <div class="canvas-wrap wf" id="wfWrap">
+        <canvas id="waterfall"></canvas>
+      </div>
+    </section>
+
+    <section class="panel signals">
+      <div class="sig-head">
+        <h2>Señales detectadas <span id="sigCount" class="badge">0</span></h2>
+        <div class="sig-actions">
+          <select id="sigSort" aria-label="Ordenar">
+            <option value="f">Por frecuencia</option>
+            <option value="db">Por nivel</option>
+            <option value="last">Más recientes</option>
+            <option value="hits">Más frecuentes</option>
+            <option value="tag">Etiquetadas primero</option>
+          </select>
+          <button id="exportCsv">CSV</button>
+          <button id="clearSig">Limpiar</button>
+        </div>
+      </div>
+      <div class="table-wrap">
+        <table>
+          <thead>
+            <tr><th></th><th></th><th></th><th>Frecuencia</th><th>Etiqueta</th><th>Nivel</th><th>SNR</th><th>Ancho</th><th>Veces</th><th>Visto</th><th>Banda</th><th></th></tr>
+          </thead>
+          <tbody id="sigBody"></tbody>
+        </table>
+        <p id="sigEmpty" class="empty">Aún no hay señales por encima del umbral. Inicia un barrido.</p>
+      </div>
+    </section>
+  </main>
+
+  <script src="bands.js"></script>
+  <script src="app.js"></script>
+</body>
+</html>
