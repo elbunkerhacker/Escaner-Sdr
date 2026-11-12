@@ -77,6 +77,8 @@ Opciones del servidor: `--rtl host:puerto` (rtl_tcp en otra máquina, p. ej. una
 ## Cómo usarlo
 
 - **Banda**: preajustes del plan de bandas (FM, aérea, PMR446, ISM 433/868, ADS-B…), o escribe inicio/fin.
+  Al elegir una banda, la frecuencia de escucha pasa al centro de la banda con su modo típico
+  (o el que guardaste en una banda propia); si ya estabas escuchando, se resintoniza.
 - **Mis bandas**: ajusta el rango (escribiéndolo o con zoom) y pulsa **＋ Guardar banda**; ponle nombre, color
   y, si quieres, el modo de escucha (se usará al pulsar 🎧 en señales de esa banda). Aparecen arriba del
   desplegable con ★, se dibujan sobre el espectro y se guardan en `data/bandas.json`. Para borrar una,

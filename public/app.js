@@ -749,6 +749,11 @@ function initControls() {
     if (!r) return;
     S.history.push({ startHz: S.cfg.startHz, stopHz: S.cfg.stopHz });
     applyCfg({ startHz: r[0], stopHz: r[1] }, true);
+    // La frecuencia de escucha pasa al centro de la banda (redondeada a 1 kHz), con el
+    // modo de la banda: el que tenga guardado si es propia, o el típico de esa banda.
+    const center = Math.round((r[0] + r[1]) / 2 / 1e3) * 1e3;
+    setListenParams(center, guessMode(center, 0));
+    if (S.listen) sendListen(); // si ya estabas escuchando, se resintoniza
   });
   initBandForm();
 
