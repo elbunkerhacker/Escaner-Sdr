@@ -6,6 +6,10 @@
 </p>
 
 <p align="center">
+  <b>🪟 Versión para Windows 10 / 11 (64 bits)</b>
+</p>
+
+<p align="center">
   <img src="docs/capturas/barrido-fm.png" alt="Barrido de la banda FM con señales detectadas y etiquetas" width="900">
 </p>
 
@@ -39,40 +43,130 @@ RTL-SDR ──USB── rtl_tcp.exe ──TCP:1234── server.js (FFT, barrido
 
 ## Requisitos
 
-- Node.js 18 o superior.
-- Drivers del RTL-SDR en Windows: instala el driver **WinUSB** con [Zadig](https://zadig.akeo.ie/)
-  sobre "Bulk-In, Interface (Interface 0)".
-- `rtl_tcp.exe` de 64 bits: descarga `Release.zip` de [rtl-sdr-blog](https://github.com/rtlsdrblog/rtl-sdr-blog/releases)
-  y copia el contenido de `x64\` (exe + dll) en `tools\rtl-sdr-x64\` (ya ignorado por git).
-  Ojo: el `rtl_tcp.exe` de `C:\SDRSharp\bin` no arranca (error 0xC000007B) porque mezcla un exe de 64 bits
-  con `rtlsdr.dll` de 32 bits.
+> **Esta versión es para Windows.** Está preparada y probada en Windows 11 de 64 bits
+> (los scripts y la guía usan PowerShell, Zadig y `rtl_tcp.exe`).
 
-## Uso
+| Qué | Detalle |
+|---|---|
+| Sistema | Windows 10 u 11 de **64 bits** |
+| Dongle | RTL-SDR con chip RTL2832U y sintonizador R820T / R828D (RTL-SDR Blog v3/v4, genéricos «RTL2838»). Probado con R820T. |
+| Antena | La del dongle sirve para empezar; una exterior o junto a una ventana mejora mucho la recepción |
+| [Node.js](https://nodejs.org/) | 18 o superior (recomendado la versión LTS) |
+| Driver USB | **WinUSB**, instalado con [Zadig](https://zadig.akeo.ie/) |
+| `rtl_tcp.exe` | Versión de **64 bits** de [rtl-sdr-blog](https://github.com/rtlsdrblog/rtl-sdr-blog/releases) |
+| Navegador | Chrome, Edge o Firefox actualizados |
+| Git | Opcional, solo para clonar el repo (también puedes bajar el ZIP) |
 
-```bash
+## Instalación en Windows
+
+Todos los comandos son para **PowerShell**, dentro de la carpeta del proyecto salvo que se diga otra cosa.
+
+### 1. Instala Node.js
+
+Descárgalo de https://nodejs.org/ (LTS) o instálalo con winget:
+
+```powershell
+winget install OpenJS.NodeJS.LTS
+```
+
+Cierra y vuelve a abrir PowerShell y comprueba que responde:
+
+```powershell
+node --version
+```
+
+### 2. Descarga el proyecto e instala sus dependencias
+
+```powershell
+git clone https://github.com/elbunkerhacker/Escaner-Sdr.git
+```
+
+```powershell
+cd Escaner-Sdr
+```
+
+```powershell
 npm install
 ```
 
-Con el dongle: en una terminal arranca rtl_tcp y en otra el servidor.
+Sin Git: en GitHub pulsa **Code → Download ZIP**, descomprímelo y ejecuta `npm install` dentro de la carpeta.
 
-```bash
+### 3. Instala el driver WinUSB con Zadig
+
+Windows no trae un driver que sirva para el RTL-SDR; hay que cambiarlo una sola vez.
+
+1. Conecta el dongle y abre [Zadig](https://zadig.akeo.ie/).
+2. Menú **Options → List All Devices**.
+3. Elige **Bulk-In, Interface (Interface 0)** (USB ID `0BDA 2838`). No elijas la *Interface 1*.
+4. A la derecha selecciona **WinUSB** y pulsa **Replace Driver** (o *Install Driver*).
+
+Si ya usabas SDR# con este dongle, este paso ya está hecho.
+
+### 4. Instala `rtl_tcp` de 64 bits
+
+El servidor necesita `rtl_tcp.exe` en `tools\rtl-sdr-x64\`. Estos comandos descargan los binarios
+oficiales de rtl-sdr-blog y copian la versión de 64 bits ahí:
+
+```powershell
+New-Item -ItemType Directory -Force tools\rtl-sdr-x64; Invoke-WebRequest https://github.com/rtlsdrblog/rtl-sdr-blog/releases/download/V1.4.0/Release.zip -OutFile $env:TEMP\rtl-sdr.zip; Expand-Archive $env:TEMP\rtl-sdr.zip $env:TEMP\rtl-sdr -Force; Copy-Item $env:TEMP\rtl-sdr\x64\* tools\rtl-sdr-x64\
+```
+
+Comprueba que ve el dongle:
+
+```powershell
+tools\rtl-sdr-x64\rtl_test.exe -t
+```
+
+Debe decir `Found 1 device(s)` y `Found Rafael Micro R820T tuner`. El aviso final
+`No E4000 tuner found, aborting.` es normal con el R820T.
+
+> **Ojo con el `rtl_tcp.exe` de SDR#** (`C:\SDRSharp\bin`): no arranca (error `0xC000007B`) porque mezcla
+> un exe de 64 bits con `rtlsdr.dll` de 32 bits. Usa el de este paso.
+
+### 5. Arranca el escáner
+
+Abre **dos** ventanas de PowerShell en la carpeta del proyecto. En la primera, `rtl_tcp`:
+
+```powershell
 npm run rtl
 ```
 
-```bash
+En la segunda, el servidor web:
+
+```powershell
 npm start
 ```
 
-Abre http://localhost:8080 y pulsa **Escanear**.
+Abre http://localhost:8080 y pulsa **▶ Escanear**. Para parar, `Ctrl+C` en cada ventana.
 
-Sin dongle (simulador con emisoras FM, banda aérea, PMR446, ISM 433, ADS-B…):
+El dongle solo lo puede usar un programa a la vez: cierra SDR# u otros programas SDR antes.
 
-```bash
+### Probar sin dongle
+
+El simulador incluido genera emisoras FM, banda aérea, PMR446, ISM 433, ADS-B, etc.:
+
+```powershell
 npm run demo
 ```
 
-Opciones del servidor: `--rtl host:puerto` (rtl_tcp en otra máquina, p. ej. una Raspberry Pi),
-`--port 8080` (puerto web), `--sim`.
+### Opciones del servidor
+
+`node server.js` admite `--port 8090` (otro puerto web), `--rtl host:puerto` (rtl_tcp en otra máquina,
+p. ej. una Raspberry Pi junto a la antena), `--sim` (simulador) y `--data carpeta` (dónde guardar tus
+bandas, frecuencias y etiquetas; por defecto `data\`).
+
+### Problemas frecuentes
+
+| Síntoma | Solución |
+|---|---|
+| Arriba pone **«Sin rtl_tcp (127.0.0.1:1234)»** | No está abierto `npm run rtl`, o se cerró. |
+| `rtl_tcp` se cierra sin mensaje o da `0xC000007B` | Mezcla de 32 y 64 bits: usa el del paso 4. |
+| `usb_open error -3` / `Failed to open rtlsdr device` | Otro programa (SDR#, otro `rtl_tcp`…) ya está usando el dongle: ciérralo. Si no hay ninguno, revisa el driver (paso 3). |
+| `No supported devices found` | El dongle no está conectado o le falta el driver WinUSB (paso 3). |
+| Ruido muy alto (~-35 dBFS) y no aparece ninguna señal | Ganancia en «Auto» o al máximo: baja a unos 40 dB. |
+| No se oye nada | Pulsa 🎧 **Escuchar** (o «🔈 Activar audio»): el navegador exige un clic para reproducir sonido. Revisa el volumen. |
+| Señales «fantasma» repetidas a un salto de distancia | Sube **Asentar** a 150 ms. |
+| El puerto 8080 está ocupado | `node server.js --port 8090` y abre http://localhost:8090. |
 
 ## Cómo usarlo
 
