@@ -129,7 +129,29 @@ Debe decir `Found 1 device(s)` y `Found Rafael Micro R820T tuner`. El aviso fina
 
 ### 5. Arranca el escáner
 
-Abre **dos** ventanas de PowerShell en la carpeta del proyecto. En la primera, `rtl_tcp`:
+**La forma fácil: el icono de la bandeja del sistema.** Haz doble clic en **`Escaner SDR.cmd`**
+(en la carpeta del proyecto). Aparece un icono junto al reloj de Windows (si no lo ves, mira en la flecha **^**)
+y arranca `rtl_tcp` y el servidor sin abrir ninguna ventana. Clic derecho en el icono:
+
+| Opción | Qué hace |
+|---|---|
+| **Abrir el escáner** | Abre http://localhost:8080 (también con doble clic en el icono) |
+| **▶ Iniciar servicios** | Arranca `rtl_tcp` y el servidor web |
+| **■ Detener y liberar el RTL-SDR** | Para los dos para que puedas usar el dongle en SDR# u otro programa |
+| **↻ Reiniciar servicios** | Los para y los vuelve a arrancar |
+| **Ver registros** | Abre la carpeta `logs\` con la salida de `rtl_tcp` y del servidor |
+| **Arrancar con Windows** | Marca o quita un acceso directo en la carpeta de Inicio |
+| **Detener y salir** | Para los servicios y quita el icono |
+
+El color del icono indica el estado: **cian** en marcha, **ámbar** a medias (solo uno de los dos),
+**gris** detenido y con el RTL-SDR libre. «Detener» también para un `rtl_tcp` o un servidor que hayas
+arrancado a mano desde una consola.
+
+Sin icono, desde PowerShell: `powershell -ExecutionPolicy Bypass -File bandeja.ps1 -Accion iniciar`
+(o `detener`, o `estado`). `-ExecutionPolicy Bypass` solo afecta a esa ejecución; no cambia la
+configuración de Windows.
+
+**A mano, con dos consolas.** Abre **dos** ventanas de PowerShell en la carpeta del proyecto. En la primera, `rtl_tcp`:
 
 ```powershell
 npm.cmd run rtl
