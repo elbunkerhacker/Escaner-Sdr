@@ -6,7 +6,8 @@
 </p>
 
 <p align="center">
-  <b>🪟 Versión para Windows 10 / 11 (64 bits)</b>
+  <b>🪟 Versión para Windows 10 / 11 (64 bits)</b><br><br>
+  <a href="https://github.com/elbunkerhacker/Escaner-Sdr/releases/latest"><b>⬇ Descargar el instalable para Windows</b></a>
 </p>
 
 <p align="center">
@@ -59,8 +60,12 @@ RTL-SDR ──USB── rtl_tcp.exe ──TCP:1234── server.js (FFT, barrido
 
 ## Instalable para Windows (lo más fácil)
 
-**`EscanerSDR-Setup-1.0.0.exe`** lo trae todo: Node.js, `rtl_tcp` de 64 bits, Zadig y el escáner.
+**[⬇ Descarga `EscanerSDR-Setup-1.0.0.exe`](https://github.com/elbunkerhacker/Escaner-Sdr/releases/latest)**
+desde la sección *Releases*. Lo trae todo: Node.js, `rtl_tcp` de 64 bits, Zadig y el escáner.
 No hace falta instalar nada más ni tener permisos de administrador.
+
+> El instalable no está firmado digitalmente: Windows SmartScreen puede avisar la primera vez.
+> Pulsa **Más información › Ejecutar de todas formas**.
 
 1. Ejecuta el instalable y sigue el asistente (**Siguiente › Instalar**). Puedes elegir crear el acceso
    directo en el Escritorio y arrancar el escáner al iniciar Windows.
