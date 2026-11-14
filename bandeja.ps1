@@ -5,9 +5,10 @@
 #
 #   Con icono:      «Escaner SDR.cmd»  (o: powershell -ExecutionPolicy Bypass -File bandeja.ps1)
 #   Sin icono:      powershell -ExecutionPolicy Bypass -File bandeja.ps1 -Accion iniciar|detener|estado
+#                   (-Accion cerrar: detiene los servicios y cierra también el icono; lo usa el desinstalador)
 
 param(
-  [ValidateSet('', 'iniciar', 'detener', 'estado')]
+  [ValidateSet('', 'iniciar', 'detener', 'estado', 'cerrar')]
   [string]$Accion = '',
   [int]$Puerto = 8080
 )
@@ -49,7 +50,9 @@ function Get-Estado {
 
 function Start-Servicios {
   if (-not (Test-Path $RtlTcp)) { throw "No encuentro $RtlTcp. Sigue el paso 4 de la instalación del README." }
-  $node = (Get-Command node -ErrorAction SilentlyContinue).Source
+  # Node.js incluido en el instalador (runtime\node.exe); si no, el que haya instalado en el sistema
+  $node = Join-Path $Raiz 'runtime\node.exe'
+  if (-not (Test-Path $node)) { $node = (Get-Command node -ErrorAction SilentlyContinue).Source }
   if (-not $node) { throw 'No encuentro Node.js. Instálalo (paso 1 del README).' }
   New-Item -ItemType Directory -Force $Logs | Out-Null
 
@@ -81,6 +84,14 @@ if ($Accion) {
   switch ($Accion) {
     'iniciar' { Start-Servicios }
     'detener' { Stop-Servicios }
+    'cerrar' {
+      Stop-Servicios
+      # Cerrar también el icono de la bandeja (otra instancia de este mismo script)
+      $ruta = [regex]::Escape($PSCommandPath)
+      Get-CimInstance Win32_Process -Filter "Name = 'powershell.exe' OR Name = 'pwsh.exe'" -ErrorAction SilentlyContinue |
+        Where-Object { $_.ProcessId -ne $PID -and $_.CommandLine -match $ruta -and $_.CommandLine -notmatch '-Accion' } |
+        ForEach-Object { Stop-Process -Id $_.ProcessId -Force -ErrorAction SilentlyContinue }
+    }
   }
   $e = Get-Estado
   "rtl_tcp: $(if ($e.Rtl) {'en marcha'} else {'parado'}) | servidor: $(if ($e.Servidor) {"en marcha ($Url)"} else {'parado'}) | $($e.Texto)"
@@ -143,7 +154,8 @@ $menu.Items.Add('-') | Out-Null
 $miSalir = $menu.Items.Add('Detener y salir')
 $tray.ContextMenuStrip = $menu
 
-$Atajo = Join-Path ([Environment]::GetFolderPath('Startup')) 'Escaner SDR.lnk'
+# Mismo nombre que el que crea el instalador con la opción «Arrancar al iniciar Windows»
+$Atajo = Join-Path ([Environment]::GetFolderPath('Startup')) 'Escáner SDR.lnk'
 
 function Update-Estado {
   $e = Get-Estado
@@ -182,9 +194,12 @@ $miInicioWin.Add_Click({
   else {
     $sh = New-Object -ComObject WScript.Shell
     $lnk = $sh.CreateShortcut($Atajo)
-    $lnk.TargetPath = Join-Path $Raiz 'Escaner SDR.cmd'
+    $lnk.TargetPath = Join-Path $env:SystemRoot 'System32\WindowsPowerShell\v1.0\powershell.exe'
+    $lnk.Arguments = "-NoProfile -WindowStyle Hidden -ExecutionPolicy Bypass -File `"$PSCommandPath`""
     $lnk.WorkingDirectory = $Raiz
     $lnk.WindowStyle = 7 # minimizada
+    $ico = Join-Path $Raiz 'escaner.ico'
+    if (Test-Path $ico) { $lnk.IconLocation = $ico }
     $lnk.Description = 'Escáner SDR de el Búnker Hacker'
     $lnk.Save()
   }

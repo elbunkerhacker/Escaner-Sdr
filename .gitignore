@@ -2,3 +2,5 @@
 tools/
 data/
 logs/
+build/
+dist/

@@ -1,0 +1,27 @@
+﻿Escáner SDR de el Búnker Hacker — componentes de terceros incluidos
+====================================================================
+
+Este instalador incluye, sin modificar, los siguientes programas. Cada uno
+conserva su propia licencia.
+
+1. Node.js (runtime\node.exe)
+   Licencia: MIT y otras (ver runtime\LICENSE)
+   https://nodejs.org/
+
+2. ws — biblioteca WebSocket para Node.js (node_modules\ws)
+   Licencia: MIT (ver node_modules\ws\LICENSE)
+   https://github.com/websockets/ws
+
+3. rtl-sdr / rtl_tcp — versión de RTL-SDR Blog (tools\rtl-sdr-x64)
+   Licencia: GNU GPL v2 o posterior
+   Código fuente: https://github.com/rtlsdrblog/rtl-sdr-blog (etiqueta V1.4.0)
+   Basado en el proyecto osmocom rtl-sdr: https://osmocom.org/projects/rtl-sdr
+
+4. Zadig (drivers\zadig.exe) — instalador del driver WinUSB
+   Licencia: GNU GPL v3
+   Código fuente: https://github.com/pbatard/libwdi (versión v1.5.1)
+   https://zadig.akeo.ie/
+
+Si quieres el código fuente exacto de alguno de estos componentes y los
+enlaces anteriores dejan de funcionar, abre una incidencia en
+https://github.com/elbunkerhacker/Escaner-Sdr/issues

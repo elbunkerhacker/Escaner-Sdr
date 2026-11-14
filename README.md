@@ -57,9 +57,38 @@ RTL-SDR ──USB── rtl_tcp.exe ──TCP:1234── server.js (FFT, barrido
 | Navegador | Chrome, Edge o Firefox actualizados |
 | Git | Opcional, solo para clonar el repo (también puedes bajar el ZIP) |
 
-## Instalación en Windows
+## Instalable para Windows (lo más fácil)
 
-Todos los comandos son para **PowerShell**, dentro de la carpeta del proyecto salvo que se diga otra cosa.
+**`EscanerSDR-Setup-1.0.0.exe`** lo trae todo: Node.js, `rtl_tcp` de 64 bits, Zadig y el escáner.
+No hace falta instalar nada más ni tener permisos de administrador.
+
+1. Ejecuta el instalable y sigue el asistente (**Siguiente › Instalar**). Puedes elegir crear el acceso
+   directo en el Escritorio y arrancar el escáner al iniciar Windows.
+2. Si tu RTL-SDR aún no tiene el driver WinUSB, al terminar te ofrece abrir **Zadig**:
+   *Options › List All Devices › «Bulk-In, Interface (Interface 0)» › WinUSB › Replace Driver*.
+   Solo hace falta la primera vez en cada PC (Zadig pide permiso de administrador).
+3. Abre **Escáner SDR** desde el Escritorio o el menú Inicio: aparece el icono en la bandeja del sistema
+   y se abre el escáner en http://localhost:8080.
+
+Se instala en `%LOCALAPPDATA%\Programs\Escaner SDR`. En el menú Inicio, carpeta **Escáner SDR**, tienes
+también el instalador del driver (Zadig), la guía y el desinstalador. Al desinstalar se conservan tus bandas,
+frecuencias y etiquetas (carpeta `data`), por si vuelves a instalarlo.
+
+**Generar el instalable** (necesita [Inno Setup 6](https://jrsoftware.org/isinfo.php):
+`winget install JRSoftware.InnoSetup`):
+
+```powershell
+powershell -ExecutionPolicy Bypass -File instalador\construir.ps1
+```
+
+Descarga Node.js (comprobando el SHA-256 oficial), `rtl_tcp` (hash fijado) y Zadig (comprobando su firma
+digital), genera el icono y deja el resultado en `dist\`. Las licencias de los componentes incluidos están en
+[instalador/LICENCIAS-TERCEROS.txt](instalador/LICENCIAS-TERCEROS.txt).
+
+## Instalación manual en Windows
+
+Si prefieres no usar el instalable. Todos los comandos son para **PowerShell**, dentro de la carpeta del
+proyecto salvo que se diga otra cosa.
 
 > Se usa `npm.cmd` en vez de `npm` porque Windows bloquea por defecto los scripts `.ps1` en PowerShell
 > (error *«la ejecución de scripts está deshabilitada en este sistema»*). `npm.cmd` funciona sin cambiar
